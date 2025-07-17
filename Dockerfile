@@ -33,8 +33,8 @@ RUN chown -R www-data:www-data var
 COPY docker/apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # 🚀 Copy custom entrypoint for running migrations, etc.
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # 🏁 Default command
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
