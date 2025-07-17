@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -40,6 +42,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $last_connected = null;
+
+    #[ORM\OneToOne(inversedBy: 'userChatbot', cascade: ['persist', 'remove'])]
+    private ?PersonalChatbot $personalBot = null;
+
+    /**
+     * @var Collection<int, Messages>
+     */
+    #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'userMessages')]
+    private Collection $Message;
+
+    public function __construct()
+    {
+        $this->Message = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -146,6 +162,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastConnected(?\DateTime $last_connected): static
     {
         $this->last_connected = $last_connected;
+
+        return $this;
+    }
+
+    public function getPersonalBot(): ?PersonalChatbot
+    {
+        return $this->personalBot;
+    }
+
+    public function setPersonalBot(?PersonalChatbot $personalBot): static
+    {
+        $this->personalBot = $personalBot;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Messages>
+     */
+    public function getMessage(): Collection
+    {
+        return $this->Message;
+    }
+
+    public function addMessage(Messages $message): static
+    {
+        if (!$this->Message->contains($message)) {
+            $this->Message->add($message);
+            $message->setUserMessages($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Messages $message): static
+    {
+        if ($this->Message->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getUserMessages() === $this) {
+                $message->setUserMessages(null);
+            }
+        }
 
         return $this;
     }

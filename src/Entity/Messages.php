@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\MessagesRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: MessagesRepository::class)]
+class Messages
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $message = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $response = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'Message')]
+    private ?User $userMessages = null;
+
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?SharedChatbot $SharedChatbot = null;
+
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?PersonalChatbot $PersonalChatbot = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?string $message): static
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    public function getResponse(): ?string
+    {
+        return $this->response;
+    }
+
+    public function setResponse(?string $response): static
+    {
+        $this->response = $response;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUserMessages(): ?User
+    {
+        return $this->userMessages;
+    }
+
+    public function setUserMessages(?User $userMessages): static
+    {
+        $this->userMessages = $userMessages;
+
+        return $this;
+    }
+
+    public function getSharedChatbot(): ?SharedChatbot
+    {
+        return $this->SharedChatbot;
+    }
+
+    public function setSharedChatbot(?SharedChatbot $SharedChatbot): static
+    {
+        $this->SharedChatbot = $SharedChatbot;
+
+        return $this;
+    }
+
+    public function getPersonalChatbot(): ?PersonalChatbot
+    {
+        return $this->PersonalChatbot;
+    }
+
+    public function setPersonalChatbot(?PersonalChatbot $PersonalChatbot): static
+    {
+        $this->PersonalChatbot = $PersonalChatbot;
+
+        return $this;
+    }
+}
