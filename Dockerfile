@@ -6,7 +6,7 @@ RUN a2enmod rewrite
 
 # 🛠️ Install necessary system dependencies
 RUN apt-get update \
-  && apt-get install -y libzip-dev git wget unzip --no-install-recommends \
+  && apt-get install -y libzip-dev git wget unzip openssl libssl-dev zlib1g-dev libsodium-dev --no-install-recommends \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

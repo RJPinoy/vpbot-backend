@@ -3,15 +3,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: extranet-symfony-app:latest
     container_name: extranet_symfony-container
     ports:
       - "8000:80"
     volumes:
       - .:/var/www/html
+      - ./config/jwt/private.pem:/var/www/html/config/jwt/private.pem:ro
+      - ./config/jwt/public.pem:/var/www/html/config/jwt/public.pem:ro
     depends_on:
       - db
     environment:
-      DATABASE_URL: "mysql://symfony:symfony@db:3306/extranetdb?serverVersion=10.4.32-MariaDB&charset=utf8mb4"
+      DATABASE_URL: "mysql://symfony:symfony@db:3306/extranetdb?serverVersion=8.0&charset=utf8mb4"
+      ADMIN_EMAIL: superadmin@extranet.com
+      ADMIN_PASSWORD: superadmin123
+      JWT_PASSPHRASE: fdb902d943d1f3450007d7f00428c503ef263859e61b29e01c26cafefc63add1
 
   db:
     image: mysql:8
@@ -26,6 +32,17 @@ services:
       # - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: extranet-phpmyadmin
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
 
 volumes:
   db_data:
