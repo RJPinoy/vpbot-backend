@@ -49,6 +49,8 @@ class CreateSuperadminCommand extends Command
         }
 
         $user = new User();
+        $user->setFirstName('Super');
+        $user->setLastName('Admin');
         $user->setEmail($email);
         $user->setRoles(['ROLE_SUPER_ADMIN']);
         $user->setUsername('superadmin');
