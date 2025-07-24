@@ -18,6 +18,8 @@ services:
       ADMIN_EMAIL: superadmin@extranet.com
       ADMIN_PASSWORD: superadmin123
       JWT_PASSPHRASE: fdb902d943d1f3450007d7f00428c503ef263859e61b29e01c26cafefc63add1
+    networks:
+      - extranet_network
 
   db:
     image: mysql:8
@@ -32,6 +34,8 @@ services:
       # - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - extranet_network
       
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -43,6 +47,11 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
+    networks:
+      - extranet_network
 
 volumes:
   db_data:
+
+networks:
+  extranet_network:
