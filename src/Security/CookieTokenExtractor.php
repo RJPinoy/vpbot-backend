@@ -9,6 +9,6 @@ class CookieTokenExtractor implements TokenExtractorInterface
 {
     public function extract(Request $request): ?string
     {
-        return $request->cookies->get('JWT');
+        return $request->cookies->get('EXT_JWT');
     }
 }

@@ -41,7 +41,7 @@ class AuthenticationSuccessListener
 
         // Set token as HTTP-only cookie
         $event->getResponse()->headers->setCookie(
-            Cookie::create('JWT', $token, new \DateTime('+1 hour'), '/', null, false, true, false, 'Lax')
+            Cookie::create('EXT_JWT', $token, new \DateTime('+1 hour'), '/', null, false, true, false, 'Lax')
         );
     }
 }

@@ -22,7 +22,7 @@ final class AuthController extends AbstractController
         
         // Clear JWT cookie (set expiration in the past)
         $response->headers->setCookie(
-            Cookie::create('JWT', '', new \DateTime('-1 hour'), '/', null, false, true, false, 'Lax')
+            Cookie::create('EXT_JWT', '', new \DateTime('-1 hour'), '/', null, false, true, false, 'Lax')
         );
 
         return $response;
