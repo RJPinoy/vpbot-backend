@@ -1,3 +1,5 @@
+# Do not forget to convert this file to LF or it won't work. It may have CRLF line endings, which causes Linux to fail executing it.
+
 # 🐘 Use official PHP 8.2 image with Apache
 FROM php:8.2-apache
 
