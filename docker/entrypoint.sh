@@ -38,6 +38,18 @@ php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migratio
 echo "Creating superadmin (if not already exists)..."
 php bin/console app:create-superadmin "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
 
+# Create fixtures if LOAD_FIXTURES in CI pipeline or .env is true
+echo "🔍 Checking if fixtures should be loaded..."
+echo "🧪 APP_ENV: ${APP_ENV:-undefined}"
+echo "📦 LOAD_FIXTURES: ${LOAD_FIXTURES:-undefined}"
+
+if [[ "$APP_ENV" == "dev" || "$LOAD_FIXTURES" == "true" ]]; then
+  echo "✅ Conditions met. Loading fixtures..."
+  php bin/console doctrine:fixtures:load --append --no-interaction
+else
+  echo "⏩ Skipping fixture loading (conditions not met)."
+fi
+
 # Start Apache
 echo "Starting Apache..."
 exec apache2-foreground

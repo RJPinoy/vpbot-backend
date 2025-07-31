@@ -12,6 +12,8 @@ services:
     depends_on:
       - db
     environment:
+      APP_ENV: dev
+      LOAD_FIXTURES: true
       DATABASE_URL: "mysql://symfony:symfony@db:3306/extranetdb?serverVersion=8.0&charset=utf8mb4"
       ADMIN_EMAIL: superadmin@extranet.com
       ADMIN_PASSWORD: superadmin123
