@@ -49,12 +49,12 @@ final class UserController extends AbstractController
     ): JsonResponse {
         $currentUser = $this->getUser();
 
-        if (!$currentUser) {
-            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
-        }
-
         if (!$this->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
             return new JsonResponse(['error' => 'Forbidden'], Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$currentUser) {
+            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
         $user = $userRepository->find($user_id);
@@ -154,5 +154,34 @@ final class UserController extends AbstractController
             'order' => $order,
             'hasMore' => $isMore,
         ]);
+    }
+
+    #[Route(path:'/api/users/{user_id}', name:'delete_user', methods: ['DELETE'])]
+    public function delete(
+        int $user_id,
+        Request $request, 
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManagerInterface
+    ): JsonResponse {
+        $currentUser = $this->getUser();
+
+        if (!$currentUser) {
+            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (!$this->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
+            return new JsonResponse(['error' => 'Forbidden'], Response::HTTP_FORBIDDEN);
+        }
+
+        $user = $userRepository->find($user_id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $entityManagerInterface->remove($user);
+        $entityManagerInterface->flush();
+
+        return new JsonResponse(['message' => 'User ' . $user_id . ' ' . $user->getUsername() . ' deleted'], Response::HTTP_OK);
     }
 }
