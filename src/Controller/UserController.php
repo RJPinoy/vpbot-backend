@@ -103,4 +103,55 @@ final class UserController extends AbstractController
             'username' => $user->getUsername(),
         ]);
     }
+
+    #[Route('/api/users', name: 'get_users', methods: ['GET'])]
+    public function listUser(
+        Request $request,
+        UserRepository $userRepository,
+    ): JsonResponse {
+        $currentUser = $this->getUser();
+
+        if (!$currentUser || !$this->isAdmin($currentUser)) {
+            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $limit = $request->query->getInt('limit', 20);
+        $offset = $request->query->getInt('offset', 0);
+        $order = strtolower($request->query->get('order', 'asc'));
+
+        // Validate order parameter
+        if (!in_array($order, ['asc', 'desc'])) {
+            return new JsonResponse([
+                'error' => 'Invalid order parameter. Use "asc" or "desc".'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Fetch users + 1 to determine if there are more
+        $users = $userRepository->findBy([], ['created_at' => $order], $limit + 1, $offset);
+
+        $isMore = count($users) > $limit;
+        $users = array_slice($users, 0, $limit);
+
+        $result = array_map(function ($user) {
+            return [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+                'firstName' => $user->getFirstName(),
+                'lastName' => $user->getLastName(),
+                'img' => $user->getPicture(),
+                'username' => $user->getUsername(),
+                'createdAt' => $user->getCreatedAt(),
+            ];
+        }, $users);
+
+        return new JsonResponse([
+            'data' => $result,
+            'limit' => $limit,
+            'offset' => $offset,
+            'count' => count($result),
+            'order' => $order,
+            'isMore' => $isMore,
+        ]);
+    }
 }
