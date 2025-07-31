@@ -29,4 +29,10 @@ class UserUpdateDto
     #[Assert\Type('string')]
     #[Assert\Length(min: 1, max: 255)]
     public ?string $img = null;
+
+    #[Assert\Type('array')]
+    #[Assert\All([
+        new Assert\Choice(choices: ['ROLE_USER', 'ROLE_ADMIN'], message: 'Each role must be either ROLE_USER or ROLE_ADMIN.'),
+    ])]
+    public ?array $roles = null;
 }

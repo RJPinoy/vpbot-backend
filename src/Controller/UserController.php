@@ -89,6 +89,9 @@ final class UserController extends AbstractController
         if ($dto->img !== null) {
             $user->setPicture($dto->img);
         }
+        if ($dto->roles !== null) {
+            $user->setRoles($dto->roles);
+        }
 
         $em->flush();
 
