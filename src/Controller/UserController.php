@@ -141,7 +141,8 @@ final class UserController extends AbstractController
                 'lastName' => $user->getLastName(),
                 'img' => $user->getPicture(),
                 'username' => $user->getUsername(),
-                'createdAt' => $user->getCreatedAt(),
+                'createdAt' => $user->getCreatedAt()->format('d/m/Y H:i'),
+                'lastConnected' => $user->getLastConnected()->format('d/m/Y H:i'),
             ];
         }, $users);
 
@@ -151,7 +152,7 @@ final class UserController extends AbstractController
             'offset' => $offset,
             'count' => count($result),
             'order' => $order,
-            'isMore' => $isMore,
+            'hasMore' => $isMore,
         ]);
     }
 }
