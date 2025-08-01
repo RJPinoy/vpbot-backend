@@ -72,24 +72,12 @@ final class UserController extends AbstractController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($dto->firstName !== null) {
-            $user->setFirstName($dto->firstName);
-        }
-        if ($dto->lastName !== null) {
-            $user->setLastName($dto->lastName);
-        }
-        if ($dto->email !== null) {
-            $user->setEmail($dto->email);
-        }
-        if ($dto->username !== null) {
-            $user->setUsername($dto->username);
-        }
-        if ($dto->img !== null) {
-            $user->setPicture($dto->img);
-        }
-        if ($dto->roles !== null) {
-            $user->setRoles($dto->roles);
-        }
+        if ($dto->firstName !== null) $user->setFirstName($dto->firstName);
+        if ($dto->lastName !== null) $user->setLastName($dto->lastName);
+        if ($dto->email !== null) $user->setEmail($dto->email);
+        if ($dto->username !== null) $user->setUsername($dto->username);
+        if ($dto->img !== null) $user->setPicture($dto->img);
+        if ($dto->roles !== null) $user->setRoles($dto->roles);
 
         $em->flush();
 

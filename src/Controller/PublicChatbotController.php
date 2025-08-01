@@ -64,54 +64,22 @@ final class PublicChatbotController extends AbstractController
             return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
         
-        if ($dto->apiKey !== null) {
-            $chatbot->setApiKey($dto->apiKey);
-        }
-        if ($dto->assistantId !== null) {
-            $chatbot->setAssistantId($dto->assistantId);
-        }
-        if ($dto->model !== null) {
-            $chatbot->setModel($dto->model);
-        }
-        if ($dto->name !== null) {
-            $chatbot->setName($dto->name);
-        }
-        if ($dto->iconUrl !== null) {
-            $chatbot->setIconUrl($dto->iconUrl);
-        }
-        if ($dto->fontColor1 !== null) {
-            $chatbot->setFontColor1($dto->fontColor1);
-        }
-        if ($dto->fontColor2 !== null) {
-            $chatbot->setFontColor2($dto->fontColor2);
-        }
-        if ($dto->mainColor !== null) {
-            $chatbot->setMainColor($dto->mainColor);
-        }
-        if ($dto->secondaryColor !== null) {
-            $chatbot->setSecondaryColor($dto->secondaryColor);
-        }
-        if ($dto->renderEveryPages !== null) {
-            $chatbot->setRenderEveryPages($dto->renderEveryPages);
-        }
-        if ($dto->position !== null) {
-            $chatbot->setPosition($dto->position);
-        }
-        if ($dto->welcomeMessage !== null) {
-            $chatbot->setWelcomeMessage($dto->welcomeMessage);
-        }
-        if ($dto->promptMessage !== null) {
-            $chatbot->setPromptMessage($dto->promptMessage);
-        }
-        if ($dto->showDesktop !== null) {
-            $chatbot->setShowDesktop($dto->showDesktop);
-        }
-        if ($dto->showTablet !== null) {
-            $chatbot->setShowTablet($dto->showTablet);
-        }
-        if ($dto->showMobile !== null) {
-            $chatbot->setShowMobile($dto->showMobile);
-        }
+        if ($dto->apiKey !== null) $chatbot->setApiKey($dto->apiKey);
+        if ($dto->assistantId !== null) $chatbot->setAssistantId($dto->assistantId);
+        if ($dto->model !== null) $chatbot->setModel($dto->model);
+        if ($dto->name !== null) $chatbot->setName($dto->name);
+        if ($dto->iconUrl !== null) $chatbot->setIconUrl($dto->iconUrl);
+        if ($dto->fontColor1 !== null) $chatbot->setFontColor1($dto->fontColor1);
+        if ($dto->fontColor2 !== null) $chatbot->setFontColor2($dto->fontColor2);
+        if ($dto->mainColor !== null) $chatbot->setMainColor($dto->mainColor);
+        if ($dto->secondaryColor !== null) $chatbot->setSecondaryColor($dto->secondaryColor);
+        if ($dto->renderEveryPages !== null) $chatbot->setRenderEveryPages($dto->renderEveryPages);
+        if ($dto->position !== null) $chatbot->setPosition($dto->position);
+        if ($dto->welcomeMessage !== null) $chatbot->setWelcomeMessage($dto->welcomeMessage);
+        if ($dto->promptMessage !== null) $chatbot->setPromptMessage($dto->promptMessage);
+        if ($dto->showDesktop !== null) $chatbot->setShowDesktop($dto->showDesktop);
+        if ($dto->showTablet !== null) $chatbot->setShowTablet($dto->showTablet);
+        if ($dto->showMobile !== null) $chatbot->setShowMobile($dto->showMobile);
 
         $em->flush();
 
