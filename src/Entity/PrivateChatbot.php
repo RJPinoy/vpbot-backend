@@ -28,7 +28,7 @@ class PrivateChatbot
     #[ORM\Column(type: "string", length: 255)]
     private ?string $model = null;
 
-    #[ORM\OneToOne(mappedBy: 'personalBot', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'privateBot', cascade: ['persist', 'remove'])]
     private ?User $userChatbot = null;
 
     /**
@@ -104,12 +104,12 @@ class PrivateChatbot
     {
         // unset the owning side of the relation if necessary
         if ($userChatbot === null && $this->userChatbot !== null) {
-            $this->userChatbot->setPersonalBot(null);
+            $this->userChatbot->setPrivatelBot(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($userChatbot !== null && $userChatbot->getPersonalBot() !== $this) {
-            $userChatbot->setPersonalBot($this);
+        if ($userChatbot !== null && $userChatbot->getPrivatelBot() !== $this) {
+            $userChatbot->setPrivatelBot($this);
         }
 
         $this->userChatbot = $userChatbot;
