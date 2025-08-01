@@ -3,7 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
-use App\DTO\UserUpdateDto;
+use App\Dto\UserUpdateDto;
+use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,10 +16,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class UserController extends AbstractController
 {
-    private function isAdmin($user): bool {
-        return in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles());
-    }
-
     #[Route('/api/me', name: 'api_me', methods: ['GET'])]
     public function me(): JsonResponse {
         $user = $this->getUser();
@@ -45,11 +42,12 @@ final class UserController extends AbstractController
         UserRepository $userRepository,
         ValidatorInterface $validatorInterface,
         SerializerInterface $serializerInterface,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        SecurityService $securityService,
     ): JsonResponse {
         $currentUser = $this->getUser();
 
-        if (!$this->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
+        if (!$securityService->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
             return new JsonResponse(['error' => 'Forbidden'], Response::HTTP_FORBIDDEN);
         }
 
@@ -111,10 +109,11 @@ final class UserController extends AbstractController
     public function listUser(
         Request $request,
         UserRepository $userRepository,
+        SecurityService $securityService,
     ): JsonResponse {
         $currentUser = $this->getUser();
 
-        if (!$currentUser || !$this->isAdmin($currentUser)) {
+        if (!$currentUser || !$securityService->isAdmin($currentUser)) {
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -164,7 +163,8 @@ final class UserController extends AbstractController
         int $user_id,
         Request $request, 
         UserRepository $userRepository,
-        EntityManagerInterface $entityManagerInterface
+        EntityManagerInterface $entityManagerInterface,
+        SecurityService $securityService,
     ): JsonResponse {
         $currentUser = $this->getUser();
 
@@ -172,7 +172,7 @@ final class UserController extends AbstractController
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (!$this->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
+        if (!$securityService->isAdmin($currentUser) && $currentUser->getId() !== $user_id) {
             return new JsonResponse(['error' => 'Forbidden'], Response::HTTP_FORBIDDEN);
         }
 
