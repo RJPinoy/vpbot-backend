@@ -17,7 +17,7 @@ class PersonalChatbot
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    private ?string $hashedApiKey = null;
+    private ?string $apiKey = null;
 
     #[ORM\Column(type: "string", length: 255)]
     private ?string $assistant = null;
@@ -47,14 +47,14 @@ class PersonalChatbot
         return $this->id;
     }
 
-    public function getHashedApiKey(): ?string
+    public function getApiKey(): ?string
     {
-        return $this->hashedApiKey;
+        return $this->apiKey;
     }
 
-    public function setHashedApiKey(string $hashedApiKey): static
+    public function setApiKey(string $apiKey): static
     {
-        $this->hashedApiKey = $hashedApiKey;
+        $this->apiKey = $apiKey;
 
         return $this;
     }

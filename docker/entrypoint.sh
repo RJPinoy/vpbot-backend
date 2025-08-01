@@ -38,6 +38,10 @@ php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migratio
 echo "Creating superadmin (if not already exists)..."
 php bin/console app:create-superadmin "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
 
+# Create public chatbot if it doesn't exist
+echo "Creating public chatbot (if not already exists)..."
+php bin/console app:create-public_chatbot
+
 # Create fixtures if LOAD_FIXTURES in CI pipeline or .env is true
 echo "🔍 Checking if fixtures should be loaded..."
 echo "🧪 APP_ENV: ${APP_ENV:-undefined}"
