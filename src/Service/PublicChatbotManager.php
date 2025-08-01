@@ -2,20 +2,20 @@
 
 namespace App\Service;
 
-use App\Entity\SharedChatbot;
+use App\Entity\PublicChatbot;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
-class SharedChatbotManager
+class PublicChatbotManager
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory
     ) {}
 
-    public function saveWithHashedApiKey(SharedChatbot $bot, string $rawApiKey): void
+    public function saveWithHashedApiKey(PublicChatbot $bot, string $rawApiKey): void
     {
-        $hasher = $this->passwordHasherFactory->getPasswordHasher('shared_chatbot');
+        $hasher = $this->passwordHasherFactory->getPasswordHasher('public_chatbot');
         $hashed = $hasher->hash($rawApiKey);
 
         $bot->setHashedApiKey($hashed);

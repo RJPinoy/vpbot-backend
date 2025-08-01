@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\SharedChatbotRepository;
+use App\Repository\PublicChatbotRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SharedChatbotRepository::class)]
-class SharedChatbot
+#[ORM\Entity(repositoryClass: PublicChatbotRepository::class)]
+class PublicChatbot
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -66,7 +66,7 @@ class SharedChatbot
     /**
      * @var Collection<int, Messages>
      */
-    #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'SharedChatbot')]
+    #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'PublicChatbot')]
     private Collection $messages;
 
     public function __construct()
@@ -283,7 +283,7 @@ class SharedChatbot
     {
         if (!$this->messages->contains($message)) {
             $this->messages->add($message);
-            $message->setSharedChatbot($this);
+            $message->setPublicChatbot($this);
         }
 
         return $this;
@@ -293,8 +293,8 @@ class SharedChatbot
     {
         if ($this->messages->removeElement($message)) {
             // set the owning side to null (unless already changed)
-            if ($message->getSharedChatbot() === $this) {
-                $message->setSharedChatbot(null);
+            if ($message->getPublicChatbot() === $this) {
+                $message->setPublicChatbot(null);
             }
         }
 

@@ -6,9 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class SharedChatbotController extends AbstractController
+final class PublicChatbotController extends AbstractController
 {
-    #[Route('/shared/chatbot', name: 'app_shared_chatbot')]
+    #[Route('/api/public_chatbot', name: 'modify_public_chatbot', methods: ['PUT'])]
     public function index(): JsonResponse
     {
         return $this->json([

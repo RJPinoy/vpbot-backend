@@ -27,7 +27,7 @@ class Messages
     private ?User $userMessages = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
-    private ?SharedChatbot $SharedChatbot = null;
+    private ?PublicChatbot $PublicChatbot = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
     private ?PersonalChatbot $PersonalChatbot = null;
@@ -85,14 +85,14 @@ class Messages
         return $this;
     }
 
-    public function getSharedChatbot(): ?SharedChatbot
+    public function getPublicChatbot(): ?PublicChatbot
     {
-        return $this->SharedChatbot;
+        return $this->PublicChatbot;
     }
 
-    public function setSharedChatbot(?SharedChatbot $SharedChatbot): static
+    public function setPublicChatbot(?PublicChatbot $PublicChatbot): static
     {
-        $this->SharedChatbot = $SharedChatbot;
+        $this->PublicChatbot = $PublicChatbot;
 
         return $this;
     }

@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\SharedChatbot;
+use App\Entity\PublicChatbot;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<SharedChatbot>
+ * @extends ServiceEntityRepository<PublicChatbot>
  */
-class SharedChatbotRepository extends ServiceEntityRepository
+class PublicChatbotRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, SharedChatbot::class);
+        parent::__construct($registry, PublicChatbot::class);
     }
 
     //    /**
-    //     * @return SharedChatbot[] Returns an array of SharedChatbot objects
+    //     * @return PublicChatbot[] Returns an array of PublicChatbot objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class SharedChatbotRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?SharedChatbot
+    //    public function findOneBySomeField($value): ?PublicChatbot
     //    {
     //        return $this->createQueryBuilder('s')
     //            ->andWhere('s.exampleField = :val')
