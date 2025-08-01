@@ -44,7 +44,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTime $last_connected = null;
 
     #[ORM\OneToOne(inversedBy: 'userChatbot', cascade: ['persist', 'remove'])]
-    private ?PersonalChatbot $personalBot = null;
+    private ?PrivateChatbot $personalBot = null;
 
     /**
      * @var Collection<int, Messages>
@@ -175,12 +175,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPersonalBot(): ?PersonalChatbot
+    public function getPersonalBot(): ?PrivateChatbot
     {
         return $this->personalBot;
     }
 
-    public function setPersonalBot(?PersonalChatbot $personalBot): static
+    public function setPersonalBot(?PrivateChatbot $personalBot): static
     {
         $this->personalBot = $personalBot;
 

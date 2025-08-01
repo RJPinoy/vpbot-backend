@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\PersonalChatbot;
+use App\Entity\PrivateChatbot;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<PersonalChatbot>
+ * @extends ServiceEntityRepository<PrivateChatbot>
  */
-class PersonalChatbotRepository extends ServiceEntityRepository
+class PrivateChatbotRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PersonalChatbot::class);
+        parent::__construct($registry, PrivateChatbot::class);
     }
 
 //    /**
-//     * @return PersonalChatbot[] Returns an array of PersonalChatbot objects
+//     * @return PrivateChatbot[] Returns an array of PrivateChatbot objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -31,7 +31,7 @@ class PersonalChatbotRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?PersonalChatbot
+//    public function findOneBySomeField($value): ?PrivateChatbot
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')

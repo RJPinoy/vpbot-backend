@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\PersonalChatbotRepository;
+use App\Repository\PrivateChatbotRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PersonalChatbotRepository::class)]
-class PersonalChatbot
+#[ORM\Entity(repositoryClass: PrivateChatbotRepository::class)]
+class PrivateChatbot
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,7 +34,7 @@ class PersonalChatbot
     /**
      * @var Collection<int, Messages>
      */
-    #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'PersonalChatbot')]
+    #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'PrivateChatbot')]
     private Collection $messages;
 
     public function __construct()
@@ -129,7 +129,7 @@ class PersonalChatbot
     {
         if (!$this->messages->contains($message)) {
             $this->messages->add($message);
-            $message->setPersonalChatbot($this);
+            $message->setPrivateChatbot($this);
         }
 
         return $this;
@@ -139,8 +139,8 @@ class PersonalChatbot
     {
         if ($this->messages->removeElement($message)) {
             // set the owning side to null (unless already changed)
-            if ($message->getPersonalChatbot() === $this) {
-                $message->setPersonalChatbot(null);
+            if ($message->getPrivateChatbot() === $this) {
+                $message->setPrivateChatbot(null);
             }
         }
 

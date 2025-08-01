@@ -30,7 +30,7 @@ class Messages
     private ?PublicChatbot $PublicChatbot = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
-    private ?PersonalChatbot $PersonalChatbot = null;
+    private ?PrivateChatbot $PrivateChatbot = null;
 
     public function getId(): ?int
     {
@@ -97,14 +97,14 @@ class Messages
         return $this;
     }
 
-    public function getPersonalChatbot(): ?PersonalChatbot
+    public function getPrivateChatbot(): ?PrivateChatbot
     {
-        return $this->PersonalChatbot;
+        return $this->PrivateChatbot;
     }
 
-    public function setPersonalChatbot(?PersonalChatbot $PersonalChatbot): static
+    public function setPrivateChatbot(?PrivateChatbot $PrivateChatbot): static
     {
-        $this->PersonalChatbot = $PersonalChatbot;
+        $this->PrivateChatbot = $PrivateChatbot;
 
         return $this;
     }
