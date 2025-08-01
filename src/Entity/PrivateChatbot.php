@@ -19,9 +19,6 @@ class PrivateChatbot
     #[ORM\Column(type: "string", length: 255)]
     private ?string $apiKey = null;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private ?string $assistant = null;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $instructions = null;
 
@@ -37,9 +34,16 @@ class PrivateChatbot
     #[ORM\OneToMany(targetEntity: Messages::class, mappedBy: 'PrivateChatbot')]
     private Collection $messages;
 
+    /**
+     * @var Collection<int, Assistant>
+     */
+    #[ORM\OneToMany(targetEntity: Assistant::class, mappedBy: 'privateChatbot')]
+    private Collection $Assistant;
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
+        $this->Assistant = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,18 +59,6 @@ class PrivateChatbot
     public function setApiKey(string $apiKey): static
     {
         $this->apiKey = $apiKey;
-
-        return $this;
-    }
-
-    public function getAssistant(): ?string
-    {
-        return $this->assistant;
-    }
-
-    public function setAssistant(string $assistant): static
-    {
-        $this->assistant = $assistant;
 
         return $this;
     }
@@ -141,6 +133,36 @@ class PrivateChatbot
             // set the owning side to null (unless already changed)
             if ($message->getPrivateChatbot() === $this) {
                 $message->setPrivateChatbot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Assistant>
+     */
+    public function getAssistant(): Collection
+    {
+        return $this->Assistant;
+    }
+
+    public function addAssistant(Assistant $assistant): static
+    {
+        if (!$this->Assistant->contains($assistant)) {
+            $this->Assistant->add($assistant);
+            $assistant->setPrivateChatbot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAssistant(Assistant $assistant): static
+    {
+        if ($this->Assistant->removeElement($assistant)) {
+            // set the owning side to null (unless already changed)
+            if ($assistant->getPrivateChatbot() === $this) {
+                $assistant->setPrivateChatbot(null);
             }
         }
 
