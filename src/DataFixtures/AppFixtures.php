@@ -30,7 +30,7 @@ class AppFixtures extends Fixture
                 ->setRoles(['ROLE_USER'])
                 ->setCreatedAt(new \DateTimeImmutable())
                 ->setLastConnected($faker->dateTimeBetween('-1 year', 'now'))
-                ->setPicture($faker->imageUrl(100, 100, 'people'));
+                ->setPicture('/assets/images/avatar/avatar.jpg');
 
             // Hash the password 'test1234'
             $hashedPassword = $this->passwordHasher->hashPassword($user, 'test1234');
