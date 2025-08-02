@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
+use App\Entity\PrivateChatbot;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -37,6 +38,13 @@ class AppFixtures extends Fixture
             $user->setPassword($hashedPassword);
 
             $manager->persist($user);
+
+            $private_chatbot = new PrivateChatbot();
+            $private_chatbot->setApiKey('sk-...')
+                ->setModel('gpt-4o-mini')
+                ->setUserChatbot($user);
+
+            $manager->persist($private_chatbot);
         }
 
         $manager->flush();

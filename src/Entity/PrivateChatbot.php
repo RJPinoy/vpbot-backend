@@ -38,12 +38,12 @@ class PrivateChatbot
      * @var Collection<int, Assistant>
      */
     #[ORM\OneToMany(targetEntity: Assistant::class, mappedBy: 'privateChatbot')]
-    private Collection $Assistant;
+    private Collection $assistants;
 
     public function __construct()
     {
         $this->messages = new ArrayCollection();
-        $this->Assistant = new ArrayCollection();
+        $this->assistants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -144,13 +144,13 @@ class PrivateChatbot
      */
     public function getAssistant(): Collection
     {
-        return $this->Assistant;
+        return $this->assistants;
     }
 
     public function addAssistant(Assistant $assistant): static
     {
-        if (!$this->Assistant->contains($assistant)) {
-            $this->Assistant->add($assistant);
+        if (!$this->assistants->contains($assistant)) {
+            $this->assistants->add($assistant);
             $assistant->setPrivateChatbot($this);
         }
 
@@ -159,7 +159,7 @@ class PrivateChatbot
 
     public function removeAssistant(Assistant $assistant): static
     {
-        if ($this->Assistant->removeElement($assistant)) {
+        if ($this->assistants->removeElement($assistant)) {
             // set the owning side to null (unless already changed)
             if ($assistant->getPrivateChatbot() === $this) {
                 $assistant->setPrivateChatbot(null);

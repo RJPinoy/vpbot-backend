@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\PrivateChatbot;
+
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,18 @@ class PrivateChatbotRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, PrivateChatbot::class);
+    }
+
+    public function findWithAssistantsByUserId(int $userId): ?PrivateChatbot
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.assistants', 'a')
+            ->addSelect('a')
+            ->leftJoin('c.userChatbot', 'u') // Join the user
+            ->andWhere('u.id = :userId')     // Filter on the joined user's ID
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**
