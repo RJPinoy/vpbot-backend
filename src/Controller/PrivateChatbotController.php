@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\PrivateChatbotUpdateDto;
 use App\Repository\PrivateChatbotRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,5 +42,63 @@ final class PrivateChatbotController extends AbstractController
         ];
 
         return new JsonResponse($data, 200);
+    }
+
+    #[Route('/api/private_chatbot/{user_id}', name: 'update_private_chatbot', methods: ['PUT'])]
+    public function updatePrivateChatbot(
+        int $user_id,
+        Request $request,
+        PrivateChatbotRepository $privateChatbotRepository,
+        ValidatorInterface $validator,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $chatbot = $privateChatbotRepository->findWithAssistantsByUserId($user_id);
+
+        if (!$chatbot) {
+            return new JsonResponse(['error' => 'Private chatbot not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $dto = new PrivateChatbotUpdateDto();
+
+        foreach ($data as $key => $value) {
+            if (property_exists($dto, $key)) {
+                $dto->$key = $value;
+            }
+        }
+
+        $errors = $validator->validate($dto);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
+        // Apply changes to entity
+        if ($dto->apiKey !== null) $chatbot->setApiKey($dto->apiKey);
+        if ($dto->instructions !== null) $chatbot->setInstructions($dto->instructions);
+        if ($dto->model !== null) $chatbot->setModel($dto->model);
+
+        $em->flush();
+
+        $responseData = [
+            'message' => 'Private chatbot updated successfully.',
+            'id' => $chatbot->getId(),
+            'apiKey' => $chatbot->getApiKey(),
+            'instructions' => $chatbot->getInstructions(),
+            'model' => $chatbot->getModel(),
+            'assistants' => array_map(function ($assistant) {
+                return [
+                    'id' => $assistant->getId(),
+                    'name' => $assistant->getName(),
+                    'description' => $assistant->getDescription(),
+                    // Add more fields if needed
+                ];
+            }, $chatbot->getAssistant()->toArray()),
+        ];
+
+        return new JsonResponse($responseData, 200);
     }
 }
