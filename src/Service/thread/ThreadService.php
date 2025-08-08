@@ -1,20 +1,16 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\thread;
 
+use App\Service\OpenaiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ThreadService extends OpenaiService
 {
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $client)
-    {
-        parent::__construct($em, $client);
-    }
-
     public function createThread(string $apiKey): array
     {
-        $response = $this->client->request('POST', $this->base_url . '/threads', [
+        $response = $this->client->request('POST', $this->baseUrl . '/threads', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',

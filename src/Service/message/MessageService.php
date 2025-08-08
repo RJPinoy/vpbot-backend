@@ -1,27 +1,23 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\message;
 
+use App\Service\OpenaiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MessageService extends OpenaiService
 {
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $client)
+    public function createMessage(string $apiKey, string $threadId, string $content): array
     {
-        parent::__construct($em, $client);
-    }
-
-    public function createMessage(string $apiKey, string $threadId, string $role, string $content): array
-    {
-        $response = $this->client->request('POST', $this->base_url . '/threads/' . $threadId . '/messages', [
+        $response = $this->client->request('POST', $this->baseUrl . '/threads/' . $threadId . '/messages', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
                 'OpenAI-Beta' => 'assistants=v2',
             ],
             'json' => [
-                'role' => $role,
+                'role' => 'user',
                 'content' => $content,
             ],
         ]);
@@ -34,7 +30,7 @@ class MessageService extends OpenaiService
 
     public function listMessages(string $apiKey, string $threadId): array
     {
-        $response = $this->client->request('GET', $this->base_url . '/threads/' . $threadId . '/messages', [
+        $response = $this->client->request('GET', $this->baseUrl . '/threads/' . $threadId . '/messages', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',

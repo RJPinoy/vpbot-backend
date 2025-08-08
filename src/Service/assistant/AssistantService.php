@@ -1,20 +1,16 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\assistant;
 
+use App\Service\OpenaiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AssistantService extends OpenaiService
 {
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $client)
-    {
-        parent::__construct($em, $client);
-    }
-
     public function createAssistant(string $apiKey, ?string $name = null, ?string $instructions = null): array
     {
-        $response = $this->client->request('POST', $this->base_url . '/assistants', [
+        $response = $this->client->request('POST', $this->baseUrl . '/assistants', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -32,9 +28,9 @@ class AssistantService extends OpenaiService
         return $data;
     }
 
-    public function listAssistants(string $apiKey): string
+    public function listAssistants(string $apiKey): array
     {
-        $response = $this->client->request('GET', $this->base_url . '/assistants', [
+        $response = $this->client->request('GET', $this->baseUrl . '/assistants', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -48,9 +44,9 @@ class AssistantService extends OpenaiService
         return $data;
     }
 
-    public function retrieveAssistant(string $apiKey, string $assistantId): string
+    public function retrieveAssistant(string $apiKey, string $assistantId): array
     {
-        $response = $this->client->request('GET', $this->base_url . '/assistants/' . $assistantId, [
+        $response = $this->client->request('GET', $this->baseUrl . '/assistants/' . $assistantId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -64,9 +60,9 @@ class AssistantService extends OpenaiService
         return $data;
     }
 
-    public function modifyAssistant(string $apiKey, string $assistantId, ?string $name = null, ?string $instructions = null, ?string $model = null): string
+    public function modifyAssistant(string $apiKey, string $assistantId, ?string $name = null, ?string $instructions = null, ?string $model = null): array
     {
-        $response = $this->client->request('POST', $this->base_url . '/assistants/' . $assistantId, [
+        $response = $this->client->request('POST', $this->baseUrl . '/assistants/' . $assistantId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -85,9 +81,9 @@ class AssistantService extends OpenaiService
         return $data;
     }
 
-    public function deleteAssistant(string $apiKey, string $assistantId): string
+    public function deleteAssistant(string $apiKey, string $assistantId): array
     {
-        $response = $this->client->request('DELETE', $this->base_url . '/assistants/' . $assistantId, [
+        $response = $this->client->request('DELETE', $this->baseUrl . '/assistants/' . $assistantId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',

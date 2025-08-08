@@ -7,13 +7,13 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class OpenaiService
 {
-    protected $base_url = '';
+    protected string $baseUrl;
     protected EntityManagerInterface $em;
     protected HttpClientInterface $client;
 
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $client)
+    public function __construct(EntityManagerInterface $em, HttpClientInterface $client, string $baseUrl)
     {
-        $this->base_url = 'https://api.openai.com/v1';
+        $this->baseUrl = rtrim($baseUrl, '/');
         $this->em = $em;
         $this->client = $client;
     }

@@ -24,7 +24,7 @@ final class PublicChatbotController extends AbstractController
         $chatbot = $publicChatbotRepository->findOneBy([]);
 
         if (!$chatbot) {
-            return new JsonResponse(['error' => 'No public chatbot found'], 404);
+            return new JsonResponse(['error' => 'No public chatbot found'], Response::HTTP_NOT_FOUND);
         }
 
         $json = $serializer->serialize($chatbot, 'json');
@@ -50,7 +50,7 @@ final class PublicChatbotController extends AbstractController
         $chatbot = $publicChatbotRepository->findOneBy([]);
 
         if (!$chatbot) {
-            return new JsonResponse(['error' => 'No public chatbot found'], 404);
+            return new JsonResponse(['error' => 'No public chatbot found'], Response::HTTP_NOT_FOUND);
         }
 
         $dto = $serializerInterface->deserialize($request->getContent(), PublicChatbotUpdateDto::class, 'json');
@@ -101,6 +101,6 @@ final class PublicChatbotController extends AbstractController
             'showDesktop' => $chatbot->isShowDesktop(),
             'showTablet' => $chatbot->isShowTablet(),
             'showMobile' => $chatbot->isShowMobile(),
-        ]);
+        ], Response::HTTP_OK);
     }
 }

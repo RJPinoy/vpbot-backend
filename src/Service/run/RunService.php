@@ -1,20 +1,16 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\run;
 
+use App\Service\OpenaiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class RunService extends OpenaiService
 {
-    public function __construct(EntityManagerInterface $em, HttpClientInterface $client)
+    public function createRun(string $apiKey, string $threadId, string $assistantId, ?string $model = null): array
     {
-        parent::__construct($em, $client);
-    }
-
-    public function createRun(string $apiKey, string $threadId, string $assistantId): array
-    {
-        $response = $this->client->request('POST', $this->base_url . '/threads/' . $threadId . '/runs', [
+        $response = $this->client->request('POST', $this->baseUrl . '/threads/' . $threadId . '/runs', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
@@ -22,6 +18,21 @@ class RunService extends OpenaiService
             ],
             'json' => [
                 'assistant_id' => $assistantId,
+                'model' => $model,
+            ],
+        ]);
+
+        $data = $response->toArray(false);
+
+        // Return raw response data as array
+        return $data;
+    }
+
+    public function getRun(string $apiKey, string $runId, string $threadId): array {
+        $response = $this->client->request('GET', $this->baseUrl . '/threads/' . $threadId . '/runs/' . $runId, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiKey,
+                'OpenAI-Beta' => 'assistants=v2',
             ],
         ]);
 

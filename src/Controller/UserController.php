@@ -24,7 +24,7 @@ final class UserController extends AbstractController
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->json([
+        return new JsonResponse([
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'roles' => $user->getRoles(),
@@ -32,7 +32,7 @@ final class UserController extends AbstractController
             'lastName' => $user->getLastName(),
             'img' => $user->getPicture(),
             'username' => $user->getUsername(),
-        ]);
+        ], Response::HTTP_OK);
     }
 
     #[Route('/api/users/{user_id}', name: 'modify_user', methods: ['PUT'])]
@@ -90,7 +90,7 @@ final class UserController extends AbstractController
             'lastName' => $user->getLastName(),
             'img' => $user->getPicture(),
             'username' => $user->getUsername(),
-        ]);
+        ], Response::HTTP_OK);
     }
 
     #[Route('/api/users', name: 'get_users', methods: ['GET'])]
@@ -143,7 +143,7 @@ final class UserController extends AbstractController
             'count' => count($result),
             'order' => $order,
             'hasMore' => $isMore,
-        ]);
+        ], Response::HTTP_OK);
     }
 
     #[Route(path:'/api/users/{user_id}', name:'delete_user', methods: ['DELETE'])]

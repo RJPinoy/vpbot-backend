@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: extranet-symfony-app:latest
+    image: rjp1noy/extranet-symfony-app
     container_name: extranet_symfony-container
     ports:
       - "8000:80"

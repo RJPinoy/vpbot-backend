@@ -23,7 +23,7 @@ final class PrivateChatbotController extends AbstractController
         $chatbot = $privateChatbotRepository->findWithAssistantsByUserId($user_id);
 
         if (!$chatbot) {
-            return new JsonResponse(['error' => 'No personal chatbot found'], 404);
+            return new JsonResponse(['error' => 'No personal chatbot found'], Response::HTTP_NOT_FOUND);
         }
 
         $data = [
@@ -55,7 +55,7 @@ final class PrivateChatbotController extends AbstractController
         $chatbot = $privateChatbotRepository->findWithAssistantsByUserId($user_id);
 
         if (!$chatbot) {
-            return new JsonResponse(['error' => 'Private chatbot not found'], 404);
+            return new JsonResponse(['error' => 'Private chatbot not found'], Response::HTTP_NOT_FOUND);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -73,7 +73,7 @@ final class PrivateChatbotController extends AbstractController
             foreach ($errors as $error) {
                 $errorMessages[$error->getPropertyPath()] = $error->getMessage();
             }
-            return new JsonResponse(['errors' => $errorMessages], 400);
+            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
         }
 
         // Apply changes to entity

@@ -41,10 +41,10 @@ class CreatePublicChatbotCommand extends Command
         $chatbot->setModel('gpt-4o-mini');
         $chatbot->setIconUrl('/assets/images/chatbot/chatbot.gif');
         $chatbot->setRenderEveryPages(true);
-        $chatbot->setFontColor1('#ffffffff');
-        $chatbot->setFontColor2('#ffffffff');
+        $chatbot->setFontColor1('#ffffff');
+        $chatbot->setFontColor2('#ffffff');
         $chatbot->setMainColor('#306285');
-        $chatbot->setSecondaryColor('#616161ff');
+        $chatbot->setSecondaryColor('#616161');
         $chatbot->setWelcomeMessage('Bonjour! Je suis VPilot, comment puis-je vous aider sur la documentation de Visual Planning ?');
         $chatbot->setPromptMessage('Posez-moi vos question.');
         $chatbot->setPosition('right');
