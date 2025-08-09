@@ -6,6 +6,8 @@ use App\Dto\PrivateChatbotUpdateDto;
 use App\Repository\PrivateChatbotRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,12 +52,18 @@ final class PrivateChatbotController extends AbstractController
         Request $request,
         PrivateChatbotRepository $privateChatbotRepository,
         ValidatorInterface $validator,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface,
     ): JsonResponse {
         $chatbot = $privateChatbotRepository->findWithAssistantsByUserId($user_id);
 
         if (!$chatbot) {
             return new JsonResponse(['error' => 'Private chatbot not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('update_private_chatbot', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
 
         $data = json_decode($request->getContent(), true);

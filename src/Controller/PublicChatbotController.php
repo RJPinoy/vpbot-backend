@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -19,7 +21,6 @@ final class PublicChatbotController extends AbstractController
     #[Route('/api/public_chatbot', name: 'get_public_chatbot', methods: ['GET'])]
     public function public_chatbot(
         PublicChatbotRepository $publicChatbotRepository,
-        SerializerInterface $serializer,
     ): JsonResponse {
         $chatbot = $publicChatbotRepository->findOneBy([]);
 
@@ -57,11 +58,17 @@ final class PublicChatbotController extends AbstractController
         SerializerInterface $serializerInterface,
         EntityManagerInterface $em,
         SecurityService $securityService,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface,
     ): JsonResponse {
         $currentUser = $this->getUser();
         
         if (!$securityService->isAdmin($currentUser)) {
             return new JsonResponse(['error' => 'Forbidden'], Response::HTTP_FORBIDDEN);
+        }
+
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('modify_public_chatbot', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
         
         $chatbot = $publicChatbotRepository->findOneBy([]);

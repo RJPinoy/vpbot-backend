@@ -6,16 +6,19 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class AuthenticationSuccessListener
 {
     private $em;
     private $requestStack;
+    private $csrfTokenManager;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
+    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->em = $entityManager;
         $this->requestStack = $requestStack;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     /**
@@ -51,7 +54,13 @@ class AuthenticationSuccessListener
 
         // Set token as HTTP-only cookie
         $event->getResponse()->headers->setCookie(
-            Cookie::create('EXT_JWT', $token, $expiresAt, '/', null, false, true, false, 'Lax')
+    Cookie::create('EXT_JWT', $token, $expiresAt, '/', null, true, true, false, 'Strict')
+        );
+
+        $csrfToken = $this->csrfTokenManager->getToken('modify_user')->getValue();
+        // Set CSRF token
+        $event->getResponse()->headers->setCookie(
+            Cookie::create('XSRF-TOKEN', $csrfToken, $expiresAt, '/', null, false, false, false, 'Strict')
         );
     }
 }

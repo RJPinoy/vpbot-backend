@@ -3,18 +3,20 @@
 namespace App\Controller;
 
 use App\Repository\PrivateChatbotRepository;
-use App\Repository\PublicChatbotRepository;
+use App\Service\chatbot\ChatbotManager;
+use App\Service\chatbot\ChatbotRunManager;
 use App\Service\MessagesService;
 use App\Service\openai\assistant\OpenaiAssistantService;
 use App\Service\openai\message\OpenaiMessageService;
 use App\Service\openai\thread\OpenaiThreadService;
 use App\Service\openai\run\OpenaiRunService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 final class OpenaiController extends AbstractController
 {
@@ -48,11 +50,12 @@ final class OpenaiController extends AbstractController
         }
     }
 
-    #[Route('/api/public/messages/list', name: 'public_list_messages', methods: ['POST'])]
-    public function publicListMessages(
+    #[Route('/api/messages/list', name: 'list_messages', methods: ['POST'])]
+    public function listMessages(
         Request $request,
-        OpenaiMessageService $openAiessageService,
-        PublicChatbotRepository $publicChatbotRepository,
+        OpenaiMessageService $openaiMessageService,
+        ChatbotManager $chatbotManager,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -60,14 +63,9 @@ final class OpenaiController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $chatbot = $publicChatbotRepository->findOneBy([]);
-        if (!$chatbot) {
-            return new JsonResponse(['error' => 'No chatbot found'], Response::HTTP_NOT_FOUND);
-        }
-
-        $apiKey = $chatbot->getApiKey();
-        if (!$apiKey) {
-            return new JsonResponse(['error'=> 'No API Key set.'], Response::HTTP_NOT_FOUND);
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('list_messages', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
 
         // Use query param for GET
@@ -77,21 +75,33 @@ final class OpenaiController extends AbstractController
             return new JsonResponse(['error' => 'Missing threadId'], Response::HTTP_NOT_FOUND);
         }
 
+        $type = $data['type'] ?? '';
+        $chatbot = $chatbotManager->getChatbot($type);
+
+        if ($chatbot === null) {
+            return new JsonResponse(['error' => 'User not authenticated or chatbot not found'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $apiKey = $chatbot->getApiKey();
+
+        if (!$apiKey) {
+            return new JsonResponse(['error'=> 'No API Key set.'], Response::HTTP_NOT_FOUND);
+        }
+
         try {
-            $result = $openAiessageService->listMessages($apiKey, $threadId);
+            $result = $openaiMessageService->listMessages($apiKey, $threadId);
             return new JsonResponse($result, Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    #[Route('/api/public/run', name:'public_poll_run_status', methods: ['POST'])]
-    public function publicPollRunStatus(
+    #[Route('/api/run', name:'poll_run_status', methods: ['POST'])]
+    public function pollRunStatus(
         Request $request,
-        OpenaiRunService $openaiRunService,
-        PublicChatbotRepository $publicChatbotRepository,
-        OpenaiMessageService $openAiessageService,
-        MessagesService $messagesService,
+        ChatbotRunManager $chatbotRunManager,
+        ChatbotManager $chatbotManager,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -99,19 +109,21 @@ final class OpenaiController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $chatbot = $publicChatbotRepository->findOneBy([]);
-        if (!$chatbot) {
-            return new JsonResponse(['error' => 'No chatbot found'], Response::HTTP_NOT_FOUND);
-        }
-
-        $apiKey = $chatbot->getApiKey();
-        if (!$apiKey) {
-            return new JsonResponse(['error'=> 'No API Key set.'], Response::HTTP_NOT_FOUND);
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('poll_run_status', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
 
         $data = json_decode($request->getContent(), true);
         $threadId = $data['threadId'] ?? '';
         $runId = $data['runId'] ?? '';
+        $type = $data['type'] ?? '';
+        $chatbot = $chatbotManager->getChatbot($type);
+
+        $apiKey = $chatbot->getApiKey();
+        if (!$apiKey) {
+            return new JsonResponse(['error'=> 'No API Key set.'], Response::HTTP_NOT_FOUND);
+        }
 
         if (!$threadId) {
             return new JsonResponse(['error'=> 'Thread ID is missing.'], Response::HTTP_NOT_FOUND);
@@ -122,32 +134,18 @@ final class OpenaiController extends AbstractController
         }
 
         try {
-            $run = $openaiRunService->getRun($apiKey, $runId, $threadId);
+            $result = $chatbotRunManager->pollRun($user, $chatbot, $apiKey, $runId, $threadId);
 
-            if ($run['status'] === 'completed') {
-                $messages = $openAiessageService->listMessages($apiKey, $threadId);
-
-                $assistantReply = null;
-                foreach ($messages['data'] as $msg) {
-                    if ($msg['role'] === 'assistant' && !empty($msg['content'][0]['text']['value'])) {
-                        $assistantReply = $msg['content'][0]['text']['value'];
-                        break;
-                    }
-                }
-
-                if ($assistantReply) {
-                    $messagesService->saveMessage($user, $chatbot, 'assistant', $assistantReply);
-                }
-
+            if ($result['status'] === 'completed') {
                 return new JsonResponse([
                     'success' => true,
                     'status'=> 'completed',
-                    'messages'=> $messages,
+                    'messages'=> $result['messages'],
                 ], Response::HTTP_OK);
             } else {
                 return new JsonResponse([
                     'success' => true,
-                    'status'=> $run['status'],
+                    'status'=> $result['status'],
                 ], Response::HTTP_PARTIAL_CONTENT);
             }
         } catch (\Exception $e) {
@@ -155,15 +153,15 @@ final class OpenaiController extends AbstractController
         }
     }
 
-    #[Route('/api/public/messages/send', name:'public_send_messages', methods: ['POST'])]
-    public function publicSendMessages(
+    #[Route('/api/messages/send', name:'send_messages', methods: ['POST'])]
+    public function sendMessages(
         Request $request,
         OpenaiThreadService $openaiThreadService,
-        OpenaiMessageService $openAiessageService,
+        OpenaiMessageService $openaiMessageService,
         MessagesService $messagesService,
         OpenaiRunService $openaiRunService,
-        PublicChatbotRepository $publicChatbotRepository,
-        EntityManagerInterface $entityManagerInterface,
+        ChatbotManager $chatbotManager,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -171,39 +169,45 @@ final class OpenaiController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $chatbot = $publicChatbotRepository->findOneBy([]);
-        if (!$chatbot) {
-            return new JsonResponse(['error' => 'No chatbot found'], Response::HTTP_NOT_FOUND);
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('send_messages', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
 
+        $data = json_decode($request->getContent(), true);
+        $assistantId = $data['assistantId'] ?? '';
+        $threadId = $data['threadId'] ?? '';
+        $message = $data['message'] ?? '';
+        $type = $data['type'] ?? '';
+        $chatbot = $chatbotManager->getChatbot($type);
+
+        if (empty($assistantId)) {
+            return new JsonResponse(['error'=> 'Assistant ID not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (empty($message)) {
+            return new JsonResponse(['error'=> 'No message provided.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($chatbot === null) {
+            return new JsonResponse(['error' => 'User not authenticated or chatbot not found'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $model = $chatbot->getModel();
         $apiKey = $chatbot->getApiKey();
+
         if (!$apiKey) {
             return new JsonResponse(['error'=> 'No API Key set.'], Response::HTTP_NOT_FOUND);
         }
 
-        // Use query param for GET
-        $data = json_decode($request->getContent(), true);
-        $assistantId = $chatbot->getAssistantId();
-        $threadId = $data['threadId'] ?? '';
-        $model = $chatbot->getModel();
-        $message = $data['message'] ?? '';
-
         try {
-            if (empty($assistantId)) {
-                return new JsonResponse(['error'=> 'Assistant ID not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            if (empty($message)) {
-                return new JsonResponse(['error'=> 'No message provided.'], Response::HTTP_NOT_FOUND);
-            }
-
             if (empty($threadId)) {
                 $thread = $openaiThreadService->createThread($apiKey)['id'];
             } else {
                 $thread = $threadId;
             }
 
-            $openAiessageService->createMessage($apiKey, $thread, $message);
+            $openaiMessageService->createMessage($apiKey, $thread, $message);
             $run = $openaiRunService->createRun($apiKey, $thread, $assistantId, $model);
 
             $messagesService->saveMessage($user, $chatbot, 'user', $message);

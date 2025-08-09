@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -44,6 +46,7 @@ final class UserController extends AbstractController
         SerializerInterface $serializerInterface,
         EntityManagerInterface $em,
         SecurityService $securityService,
+        CsrfTokenManagerInterface $csrfTokenManagerInterface,
     ): JsonResponse {
         $currentUser = $this->getUser();
 
@@ -53,6 +56,11 @@ final class UserController extends AbstractController
 
         if (!$currentUser) {
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $csrfToken = $request->headers->get('X-CSRF-TOKEN');
+        if (!$csrfTokenManagerInterface->isTokenValid(new CsrfToken('modify_user', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
         }
 
         $user = $userRepository->find($user_id);
