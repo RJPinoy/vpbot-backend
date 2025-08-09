@@ -27,9 +27,26 @@ final class PublicChatbotController extends AbstractController
             return new JsonResponse(['error' => 'No public chatbot found'], Response::HTTP_NOT_FOUND);
         }
 
-        $json = $serializer->serialize($chatbot, 'json');
+        $data = [
+            'apiKey' => $chatbot->getApiKey(),
+            'assistantId' => $chatbot->getAssistantId(),
+            'model' => $chatbot->getModel(),
+            'name' => $chatbot->getName(),
+            'iconUrl' => $chatbot->getIconUrl(),
+            'fontColor1' => $chatbot->getFontColor1(),
+            'fontColor2' => $chatbot->getFontColor2(),
+            'mainColor' => $chatbot->getMainColor(),
+            'secondaryColor' => $chatbot->getSecondaryColor(),
+            'renderEveryPages' => $chatbot->isRenderEveryPages(),
+            'position' => $chatbot->getPosition(),
+            'welcomeMessage' => $chatbot->getWelcomeMessage(),
+            'promptMessage' => $chatbot->getPromptMessage(),
+            'showDesktop' => $chatbot->isShowDesktop(),
+            'showTablet' => $chatbot->isShowTablet(),
+            'showMobile' => $chatbot->isShowMobile(),
+        ];
 
-        return new JsonResponse($json, 200, [], true);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     #[Route('/api/public_chatbot', name: 'modify_public_chatbot', methods: ['PUT'])]

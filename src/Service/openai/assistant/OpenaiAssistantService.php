@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Service\assistant;
+namespace App\Service\openai\assistant;
 
-use App\Service\OpenaiService;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\openai\OpenaiService;
 
-class AssistantService extends OpenaiService
+class OpenaiAssistantService extends OpenaiService
 {
     public function createAssistant(string $apiKey, ?string $name = null, ?string $instructions = null): array
     {

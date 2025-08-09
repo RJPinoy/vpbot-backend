@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\PrivateChatbot;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -61,7 +62,13 @@ class CreateSuperadminCommand extends Command
             $this->passwordHasher->hashPassword($user, $pass)
         );
 
+        $private_chatbot = new PrivateChatbot();
+        $private_chatbot->setApiKey('sk-...');
+        $private_chatbot->setModel('gpt-4o-mini');
+        $private_chatbot->setUserChatbot($user);
+
         $this->em->persist($user);
+        $this->em->persist($private_chatbot);
         $this->em->flush();
 
         $io->success("Superadmin $email created.");

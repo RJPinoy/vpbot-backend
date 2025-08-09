@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Repository\PrivateChatbotRepository;
 use App\Repository\PublicChatbotRepository;
-use App\Service\assistant\AssistantService;
-use App\Service\message\MessageService;
-use App\Service\run\RunService;
-use App\Service\thread\ThreadService;
+use App\Service\MessagesService;
+use App\Service\openai\assistant\OpenaiAssistantService;
+use App\Service\openai\message\OpenaiMessageService;
+use App\Service\openai\thread\OpenaiThreadService;
+use App\Service\openai\run\OpenaiRunService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +20,7 @@ final class OpenaiController extends AbstractController
 {
     #[Route('/api/assistants', name: 'get_assistants', methods: ['GET'])]
     public function listAssistants(
-        AssistantService $assistantService,
+        OpenaiAssistantService $openaiAssistantService,
         PrivateChatbotRepository $privateChatbotRepository,
     ): JsonResponse {
         $user = $this->getUser();
@@ -39,7 +41,7 @@ final class OpenaiController extends AbstractController
         }
 
         try {
-            $result = $assistantService->listAssistants($apiKey);
+            $result = $openaiAssistantService->listAssistants($apiKey);
             return new JsonResponse($result, Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -49,7 +51,7 @@ final class OpenaiController extends AbstractController
     #[Route('/api/public/messages/list', name: 'public_list_messages', methods: ['POST'])]
     public function publicListMessages(
         Request $request,
-        MessageService $messageService,
+        OpenaiMessageService $openAiessageService,
         PublicChatbotRepository $publicChatbotRepository,
     ): JsonResponse {
         $user = $this->getUser();
@@ -76,7 +78,7 @@ final class OpenaiController extends AbstractController
         }
 
         try {
-            $result = $messageService->listMessages($apiKey, $threadId);
+            $result = $openAiessageService->listMessages($apiKey, $threadId);
             return new JsonResponse($result, Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -86,9 +88,10 @@ final class OpenaiController extends AbstractController
     #[Route('/api/public/run', name:'public_poll_run_status', methods: ['POST'])]
     public function publicPollRunStatus(
         Request $request,
-        MessageService $messageService,
-        RunService $runService,
+        OpenaiRunService $openaiRunService,
         PublicChatbotRepository $publicChatbotRepository,
+        OpenaiMessageService $openAiessageService,
+        MessagesService $messagesService,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -107,8 +110,8 @@ final class OpenaiController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-        $threadId = htmlspecialchars($data['threadId'] ?? '');
-        $runId = htmlspecialchars($data['runId'] ?? '');
+        $threadId = $data['threadId'] ?? '';
+        $runId = $data['runId'] ?? '';
 
         if (!$threadId) {
             return new JsonResponse(['error'=> 'Thread ID is missing.'], Response::HTTP_NOT_FOUND);
@@ -119,10 +122,22 @@ final class OpenaiController extends AbstractController
         }
 
         try {
-            $run = $runService->getRun($apiKey, $runId, $threadId);
+            $run = $openaiRunService->getRun($apiKey, $runId, $threadId);
 
             if ($run['status'] === 'completed') {
-                $messages = $messageService->listMessages($apiKey, $threadId);
+                $messages = $openAiessageService->listMessages($apiKey, $threadId);
+
+                $assistantReply = null;
+                foreach ($messages['data'] as $msg) {
+                    if ($msg['role'] === 'assistant' && !empty($msg['content'][0]['text']['value'])) {
+                        $assistantReply = $msg['content'][0]['text']['value'];
+                        break;
+                    }
+                }
+
+                if ($assistantReply) {
+                    $messagesService->saveMessage($user, $chatbot, 'assistant', $assistantReply);
+                }
 
                 return new JsonResponse([
                     'success' => true,
@@ -143,10 +158,12 @@ final class OpenaiController extends AbstractController
     #[Route('/api/public/messages/send', name:'public_send_messages', methods: ['POST'])]
     public function publicSendMessages(
         Request $request,
-        ThreadService $threadService,
-        MessageService $messageService,
-        RunService $runService,
+        OpenaiThreadService $openaiThreadService,
+        OpenaiMessageService $openAiessageService,
+        MessagesService $messagesService,
+        OpenaiRunService $openaiRunService,
         PublicChatbotRepository $publicChatbotRepository,
+        EntityManagerInterface $entityManagerInterface,
     ): JsonResponse {
         $user = $this->getUser();
 
@@ -167,9 +184,9 @@ final class OpenaiController extends AbstractController
         // Use query param for GET
         $data = json_decode($request->getContent(), true);
         $assistantId = $chatbot->getAssistantId();
-        $threadId = htmlspecialchars($data['threadId'] ?? '');
+        $threadId = $data['threadId'] ?? '';
         $model = $chatbot->getModel();
-        $message = htmlspecialchars($data['message'] ?? '');
+        $message = $data['message'] ?? '';
 
         try {
             if (empty($assistantId)) {
@@ -181,13 +198,15 @@ final class OpenaiController extends AbstractController
             }
 
             if (empty($threadId)) {
-                $thread = $threadService->createThread($apiKey)['id'];
+                $thread = $openaiThreadService->createThread($apiKey)['id'];
             } else {
                 $thread = $threadId;
             }
 
-            $messageService->createMessage($apiKey, $thread, $message);
-            $run = $runService->createRun($apiKey, $thread, $assistantId, $model);
+            $openAiessageService->createMessage($apiKey, $thread, $message);
+            $run = $openaiRunService->createRun($apiKey, $thread, $assistantId, $model);
+
+            $messagesService->saveMessage($user, $chatbot, 'user', $message);
 
             return new JsonResponse([
                 'success' => true,

@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Service\thread;
+namespace App\Service\openai\thread;
 
-use App\Service\OpenaiService;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\openai\OpenaiService;
 
-class ThreadService extends OpenaiService
+class OpenaiThreadService extends OpenaiService
 {
     public function createThread(string $apiKey): array
     {

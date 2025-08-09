@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\openai;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

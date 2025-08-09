@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Service\run;
+namespace App\Service\openai\run;
 
-use App\Service\OpenaiService;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\openai\OpenaiService;
 
-class RunService extends OpenaiService
+class OpenaiRunService extends OpenaiService
 {
     public function createRun(string $apiKey, string $threadId, string $assistantId, ?string $model = null): array
     {

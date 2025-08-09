@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Service\message;
+namespace App\Service\openai\message;
 
-use App\Service\OpenaiService;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\openai\OpenaiService;
 
-class MessageService extends OpenaiService
+class OpenaiMessageService extends OpenaiService
 {
     public function createMessage(string $apiKey, string $threadId, string $content): array
     {
