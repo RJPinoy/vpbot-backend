@@ -54,7 +54,7 @@ class AuthenticationSuccessListener
 
         // Set token as HTTP-only cookie
         $event->getResponse()->headers->setCookie(
-    Cookie::create('EXT_JWT', $token, $expiresAt, '/', null, true, true, false, 'Strict')
+    Cookie::create('EXT_JWT', $token, $expiresAt, '/', null, false, true, false, 'Strict')
         );
 
         $csrfToken = $this->csrfTokenManager->getToken('modify_user')->getValue();
